@@ -49,8 +49,7 @@ export default function App() {
 
   const chartData = reports.map((r) => ({
     mes: r.label,
-    ingresos: r.ventas?.ingresos || 0,
-    ordenes: r.ventas?.ordenes || 0
+    ingresos: r.ventas?.ingresos || 0
   }));
 
   return (
@@ -59,12 +58,12 @@ export default function App() {
       background: "#0F1E35",
       color: "white",
       fontFamily: "Arial, sans-serif",
-      padding: 40
+      padding: 28
     }}>
-      <h1>Centro de Control Comercial BordaXpress</h1>
+      <h1 style={{ marginTop: 0 }}>Centro de Control Comercial BordaXpress</h1>
       <p style={{ color: "#94A3B8" }}>{status}</p>
 
-      <div style={{ marginTop: 24, marginBottom: 32 }}>
+      <div style={{ marginTop: 20, marginBottom: 24 }}>
         {reports.map((r) => (
           <button
             key={r.month}
@@ -92,7 +91,7 @@ export default function App() {
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
             gap: 16,
-            marginTop: 20
+            marginTop: 16
           }}>
             <Card title="Ingresos" value={fmtMoney(ventas.ingresos)} />
             <Card title="Órdenes" value={ventas.ordenes} />
@@ -101,21 +100,23 @@ export default function App() {
 
           <div style={{
             background: "#162844",
-            padding: 24,
+            padding: 20,
             borderRadius: 14,
-            marginTop: 28
+            marginTop: 20
           }}>
             <h3 style={{ marginTop: 0 }}>Ingresos por mes</h3>
 
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E3A5F" />
-                <XAxis dataKey="mes" stroke="#94A3B8" />
-                <YAxis stroke="#94A3B8" tickFormatter={(v) => `$${v / 1000}k`} />
-                <Tooltip formatter={(value) => fmtMoney(value)} />
-                <Bar dataKey="ingresos" fill="#3B82F6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div style={{ width: "100%", height: 220 }}>
+              <ResponsiveContainer>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1E3A5F" />
+                  <XAxis dataKey="mes" stroke="#94A3B8" />
+                  <YAxis stroke="#94A3B8" tickFormatter={(v) => `$${v / 1000}k`} />
+                  <Tooltip formatter={(value) => fmtMoney(value)} />
+                  <Bar dataKey="ingresos" fill="#3B82F6" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </>
       )}
@@ -127,7 +128,7 @@ function Card({ title, value }) {
   return (
     <div style={{
       background: "#162844",
-      padding: 24,
+      padding: 20,
       borderRadius: 14
     }}>
       <p style={{ color: "#94A3B8", margin: 0 }}>{title}</p>
