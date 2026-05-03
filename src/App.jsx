@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
-// update
+
 const fmtMoney = (n) =>
   n == null ? "N/D" : `$${Number(n).toLocaleString("es-MX")}`;
 
@@ -37,6 +46,12 @@ export default function App() {
   const current = reports.find((r) => r.month === selectedMonth);
   const ventas = current?.ventas || {};
   const ticket = ventas.ordenes ? ventas.ingresos / ventas.ordenes : null;
+
+  const chartData = reports.map((r) => ({
+    mes: r.label,
+    ingresos: r.ventas?.ingresos || 0,
+    ordenes: r.ventas?.ordenes || 0
+  }));
 
   return (
     <div style={{
@@ -82,6 +97,25 @@ export default function App() {
             <Card title="Ingresos" value={fmtMoney(ventas.ingresos)} />
             <Card title="Órdenes" value={ventas.ordenes} />
             <Card title="Ticket promedio" value={fmtMoney(ticket)} />
+          </div>
+
+          <div style={{
+            background: "#162844",
+            padding: 24,
+            borderRadius: 14,
+            marginTop: 28
+          }}>
+            <h3 style={{ marginTop: 0 }}>Ingresos por mes</h3>
+
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1E3A5F" />
+                <XAxis dataKey="mes" stroke="#94A3B8" />
+                <YAxis stroke="#94A3B8" tickFormatter={(v) => `$${v / 1000}k`} />
+                <Tooltip formatter={(value) => fmtMoney(value)} />
+                <Bar dataKey="ingresos" fill="#3B82F6" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </>
       )}
