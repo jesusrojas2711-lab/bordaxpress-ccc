@@ -5,7 +5,7 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
-
+// update
 const fmtMoney = (n) =>
   n == null ? "N/D" : `$${Number(n).toLocaleString("es-MX")}`;
 
