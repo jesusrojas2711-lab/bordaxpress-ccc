@@ -47,6 +47,16 @@ export default function App() {
   const ventas = current?.ventas || {};
   const ticket = ventas.ordenes ? ventas.ingresos / ventas.ordenes : null;
 
+  // 🔥 crecimiento mes vs mes
+  const currentIndex = reports.findIndex((r) => r.month === selectedMonth);
+  const prev = reports[currentIndex - 1];
+
+  const growth =
+    prev && prev.ventas?.ingresos
+      ? ((ventas.ingresos - prev.ventas.ingresos) / prev.ventas.ingresos) * 100
+      : null;
+
+  // 📊 data gráfica
   const chartData = reports.map((r) => ({
     mes: r.label,
     ingresos: r.ventas?.ingresos || 0
@@ -60,9 +70,12 @@ export default function App() {
       fontFamily: "Arial, sans-serif",
       padding: 28
     }}>
-      <h1 style={{ marginTop: 0 }}>Centro de Control Comercial BordaXpress</h1>
+      <h1 style={{ marginTop: 0 }}>
+        Centro de Control Comercial BordaXpress
+      </h1>
       <p style={{ color: "#94A3B8" }}>{status}</p>
 
+      {/* selector */}
       <div style={{ marginTop: 20, marginBottom: 24 }}>
         {reports.map((r) => (
           <button
@@ -87,17 +100,27 @@ export default function App() {
         <>
           <h2>{current.label} {current.month}</h2>
 
+          {/* KPIs */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(4, 1fr)",
             gap: 16,
             marginTop: 16
           }}>
             <Card title="Ingresos" value={fmtMoney(ventas.ingresos)} />
             <Card title="Órdenes" value={ventas.ordenes} />
             <Card title="Ticket promedio" value={fmtMoney(ticket)} />
+            <Card
+              title="Crecimiento"
+              value={
+                growth == null
+                  ? "N/D"
+                  : `${growth > 0 ? "+" : ""}${growth.toFixed(1)}%`
+              }
+            />
           </div>
 
+          {/* gráfica */}
           <div style={{
             background: "#162844",
             padding: 20,
