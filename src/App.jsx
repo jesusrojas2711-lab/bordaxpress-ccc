@@ -5,22 +5,21 @@ import {
   Tooltip, ResponsiveContainer
 } from "recharts";
 
-/* ─── SUPABASE ─── */
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-/* ─── UTILIDADES ─── */
 const fmtMoney = (n) =>
   n == null ? "N/D" : `$${Number(n).toLocaleString("es-MX")}`;
+
+const fmtN = (n) =>
+  n == null ? "N/D" : Number(n).toLocaleString("es-MX");
 
 const safe = (n) => n ?? 0;
 
 const delta = (a, b) =>
   a && b ? (((b - a) / a) * 100).toFixed(1) : null;
-
-/* ─── COMPONENTES ─── */
 
 function Card({ title, value }) {
   return (
@@ -60,34 +59,30 @@ function Box({ title, children }) {
   );
 }
 
-/* ─── INSIGHTS ADS ─── */
 function getAdsInsights(ads) {
   const insights = [];
-
   if (!ads) return insights;
 
-  if (ads.roasEstimado < 3) {
-    insights.push({ type: "bad", text: "ROAS bajo (<3) — no rentable" });
+  if (ads.roasEstimado == null) {
+    insights.push({ type: "warn", text: "Ads activos, pero faltan datos de ventas para calcular ROAS real." });
+  } else if (ads.roasEstimado < 3) {
+    insights.push({ type: "bad", text: "ROAS bajo — campaña no rentable." });
   } else if (ads.roasEstimado < 6) {
-    insights.push({ type: "warn", text: "ROAS medio — optimizar" });
+    insights.push({ type: "warn", text: "ROAS medio — optimizar campaña." });
   } else {
-    insights.push({ type: "ok", text: "ROAS alto — escalar inversión" });
+    insights.push({ type: "ok", text: "ROAS alto — campaña escalable." });
   }
 
-  if (ads.costoPorConv > 25) {
-    insights.push({ type: "bad", text: "Costo por conversación alto" });
+  if (ads.costoPorConv == null) {
+    insights.push({ type: "warn", text: "Falta registrar conversaciones para calcular costo por conversación." });
+  } else if (ads.costoPorConv > 25) {
+    insights.push({ type: "bad", text: "Costo por conversación alto." });
   } else if (ads.costoPorConv < 15) {
-    insights.push({ type: "ok", text: "Costo por conversación eficiente" });
-  }
-
-  if (ads.conversaciones < 30) {
-    insights.push({ type: "warn", text: "Bajo volumen de conversaciones" });
+    insights.push({ type: "ok", text: "Costo por conversación eficiente." });
   }
 
   return insights;
 }
-
-/* ─── APP ─── */
 
 export default function App() {
   const [reports, setReports] = useState([]);
@@ -124,16 +119,12 @@ export default function App() {
   const ventas = current.ventas || {};
   const whatsapp = current.whatsapp || {};
   const ads = current.ads || null;
+  const redes = current.redes || {};
+  const ig = redes.ig || {};
+  const fb = redes.fb || {};
 
-  /* ─── MÉTRICAS ─── */
-
-  const ticket = ventas.ordenes
-    ? ventas.ingresos / ventas.ordenes
-    : 0;
-
-  const ingresoPorMensaje = whatsapp.mensajes
-    ? ventas.ingresos / whatsapp.mensajes
-    : 0;
+  const ticket = ventas.ordenes ? ventas.ingresos / ventas.ordenes : 0;
+  const ingresoPorMensaje = whatsapp.mensajes ? ventas.ingresos / whatsapp.mensajes : 0;
 
   const crecimiento =
     prev?.ventas?.ingresos
@@ -145,22 +136,25 @@ export default function App() {
     ingresos: safe(r.ventas?.ingresos)
   }));
 
-  /* ─── INSIGHTS GENERALES ─── */
+  const redesChart = [
+    { plataforma: "Instagram", visualizaciones: safe(ig.vis), alcance: safe(ig.alcance), clics: safe(ig.clics), seguidores: safe(ig.segNuevos) },
+    { plataforma: "Facebook", visualizaciones: safe(fb.vis), alcance: safe(fb.alcance), clics: safe(fb.clics), seguidores: safe(fb.segNuevos) }
+  ];
 
   const insights = [];
 
   if (whatsapp.tasaConv < 20) {
-    insights.push({ type: "bad", text: "Conversión baja en WhatsApp" });
+    insights.push({ type: "bad", text: "Conversión baja en WhatsApp." });
   } else if (whatsapp.tasaConv > 25) {
-    insights.push({ type: "ok", text: "Alta conversión en WhatsApp" });
+    insights.push({ type: "ok", text: "Alta conversión en WhatsApp." });
   }
 
   if (whatsapp.t1Resp > 20) {
-    insights.push({ type: "warn", text: "Tiempo de respuesta alto" });
+    insights.push({ type: "warn", text: "Tiempo de respuesta alto." });
   }
 
   if (ingresoPorMensaje > 500) {
-    insights.push({ type: "ok", text: "Alto valor por conversación" });
+    insights.push({ type: "ok", text: "Alto valor por conversación." });
   }
 
   return (
@@ -168,7 +162,6 @@ export default function App() {
       <h1>Centro de Control Comercial BX</h1>
       <p style={styles.sub}>{status}</p>
 
-      {/* SELECTOR MES */}
       <div style={styles.selector}>
         {reports.map((r) => (
           <button
@@ -184,9 +177,8 @@ export default function App() {
         ))}
       </div>
 
-      {/* TABS */}
       <div style={styles.tabs}>
-        {["resumen", "whatsapp", "ads", "insights"].map((t) => (
+        {["resumen", "whatsapp", "redes", "ads", "insights"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -200,7 +192,6 @@ export default function App() {
         ))}
       </div>
 
-      {/* RESUMEN */}
       {tab === "resumen" && (
         <>
           <div style={styles.grid4}>
@@ -224,7 +215,6 @@ export default function App() {
         </>
       )}
 
-      {/* WHATSAPP */}
       {tab === "whatsapp" && (
         <div style={styles.grid4}>
           <Card title="Mensajes" value={whatsapp.mensajes} />
@@ -234,7 +224,48 @@ export default function App() {
         </div>
       )}
 
-      {/* ADS */}
+      {tab === "redes" && (
+        <>
+          <div style={styles.grid4}>
+            <Card title="IG visualizaciones" value={fmtN(ig.vis)} />
+            <Card title="IG alcance" value={fmtN(ig.alcance)} />
+            <Card title="FB visualizaciones" value={fmtN(fb.vis)} />
+            <Card title="FB alcance" value={fmtN(fb.alcance)} />
+          </div>
+
+          <div style={styles.grid4}>
+            <Card title="IG seguidores" value={fmtN(ig.segNuevos)} />
+            <Card title="FB seguidores" value={fmtN(fb.segNuevos)} />
+            <Card title="IG clics" value={fmtN(ig.clics)} />
+            <Card title="FB clics" value={fmtN(fb.clics)} />
+          </div>
+
+          <Box title="Visualizaciones por plataforma">
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={redesChart}>
+                <CartesianGrid stroke="#1E3A5F" />
+                <XAxis dataKey="plataforma" stroke="#94A3B8" />
+                <YAxis stroke="#94A3B8" />
+                <Tooltip />
+                <Bar dataKey="visualizaciones" fill="#3B82F6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+
+          <Box title="Clics por plataforma">
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={redesChart}>
+                <CartesianGrid stroke="#1E3A5F" />
+                <XAxis dataKey="plataforma" stroke="#94A3B8" />
+                <YAxis stroke="#94A3B8" />
+                <Tooltip />
+                <Bar dataKey="clics" fill="#10B981" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+        </>
+      )}
+
       {tab === "ads" && (
         <>
           {!ads ? (
@@ -245,15 +276,15 @@ export default function App() {
             <>
               <div style={styles.grid4}>
                 <Card title="Inversión" value={fmtMoney(ads.inversion)} />
-                <Card title="Clics" value={ads.clics} />
-                <Card title="Conversaciones" value={ads.conversaciones} />
-                <Card title="Costo x Conv." value={`$${ads.costoPorConv}`} />
+                <Card title="Alcance" value={fmtN(ads.alcance)} />
+                <Card title="Clics" value={fmtN(ads.clics)} />
+                <Card title="Conversaciones" value={fmtN(ads.conversaciones)} />
               </div>
 
               <div style={styles.grid4}>
-                <Card title="ROAS Directo" value={`${ads.roasDirecto}x`} />
-                <Card title="ROAS Estimado" value={`${ads.roasEstimado}x`} />
-                <Card title="Ingresos Directos" value={fmtMoney(ads.ingresosDirectos)} />
+                <Card title="Costo x Conv." value={ads.costoPorConv == null ? "N/D" : `$${ads.costoPorConv}`} />
+                <Card title="ROAS Directo" value={ads.roasDirecto == null ? "N/D" : `${ads.roasDirecto}x`} />
+                <Card title="ROAS Estimado" value={ads.roasEstimado == null ? "N/D" : `${ads.roasEstimado}x`} />
                 <Card title="Ingresos Estimados" value={fmtMoney(ads.ingresosEstimados)} />
               </div>
 
@@ -267,7 +298,6 @@ export default function App() {
         </>
       )}
 
-      {/* INSIGHTS */}
       {tab === "insights" && (
         <Box title="Diagnóstico General">
           {insights.length === 0 && <p>Todo en rango</p>}
@@ -279,8 +309,6 @@ export default function App() {
     </div>
   );
 }
-
-/* ─── ESTILOS ─── */
 
 const styles = {
   container: {
@@ -301,7 +329,7 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer"
   },
-  tabs: { display: "flex", gap: 20, marginBottom: 20 },
+  tabs: { display: "flex", gap: 20, marginBottom: 20, overflowX: "auto" },
   tab: {
     background: "transparent",
     color: "white",
@@ -312,7 +340,8 @@ const styles = {
   grid4: {
     display: "grid",
     gridTemplateColumns: "repeat(4,1fr)",
-    gap: 16
+    gap: 16,
+    marginBottom: 16
   },
   card: {
     background: "#162844",
