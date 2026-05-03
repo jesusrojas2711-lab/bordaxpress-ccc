@@ -7,10 +7,10 @@ export default function App() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontSize: "40px",
-      fontFamily: "Arial"
+      fontFamily: "Arial",
+      fontSize: "40px"
     }}>
-      BordaXpress CCC funcionando
+      React funcionando en BordaXpress CCC
     </div>
   );
 }
