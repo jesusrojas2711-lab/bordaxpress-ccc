@@ -1,7 +1,16 @@
 export default function App() {
   return (
-    <h1 style={{ color: "red", fontSize: "40px" }}>
-      PRUEBA BORDA XPRESS
-    </h1>
+    <div style={{
+      minHeight: "100vh",
+      background: "#0F1E35",
+      color: "white",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "40px",
+      fontFamily: "Arial"
+    }}>
+      BordaXpress CCC funcionando
+    </div>
   );
 }
