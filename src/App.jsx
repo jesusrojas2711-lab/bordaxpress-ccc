@@ -1,28 +1,41 @@
 import { useEffect, useState } from "react";
-import { supabase } from "./supabaseClient.js";
+import { createClient } from "@supabase/supabase-js";
 
 export default function App() {
+  const [status, setStatus] = useState("Iniciando...");
   const [reports, setReports] = useState([]);
-  const [status, setStatus] = useState("Cargando datos...");
 
   useEffect(() => {
-    async function loadReports() {
-      const { data, error } = await supabase
-        .from("monthly_reports")
-        .select("month, label, ventas")
-        .order("month", { ascending: true });
+    async function test() {
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      if (error) {
-        console.error(error);
-        setStatus("Error conectando con Supabase");
+      if (!url || !key) {
+        setStatus("Faltan variables de Supabase en Vercel");
         return;
       }
 
-      setReports(data || []);
-      setStatus("Conectado a Supabase");
+      try {
+        const supabase = createClient(url, key);
+
+        const { data, error } = await supabase
+          .from("monthly_reports")
+          .select("month, label, ventas")
+          .order("month", { ascending: true });
+
+        if (error) {
+          setStatus("Error Supabase: " + error.message);
+          return;
+        }
+
+        setReports(data || []);
+        setStatus("Conectado a Supabase");
+      } catch (err) {
+        setStatus("Error JS: " + err.message);
+      }
     }
 
-    loadReports();
+    test();
   }, []);
 
   return (
@@ -31,21 +44,16 @@ export default function App() {
       background: "#0F1E35",
       color: "white",
       fontFamily: "Arial",
-      padding: "40px"
+      padding: 40
     }}>
-      <h1>Centro de Control Comercial BordaXpress</h1>
+      <h1>BordaXpress CCC</h1>
       <p>{status}</p>
 
-      {reports.map((report) => (
-        <div key={report.month} style={{
-          background: "#162844",
-          padding: "20px",
-          marginTop: "16px",
-          borderRadius: "12px"
-        }}>
-          <h2>{report.label} {report.month}</h2>
-          <p>Ingresos: ${report.ventas?.ingresos?.toLocaleString("es-MX")}</p>
-          <p>Órdenes: {report.ventas?.ordenes}</p>
+      {reports.map((r) => (
+        <div key={r.month} style={{ background: "#162844", padding: 20, marginTop: 16, borderRadius: 12 }}>
+          <h2>{r.label} - {r.month}</h2>
+          <p>Ingresos: ${r.ventas?.ingresos?.toLocaleString("es-MX")}</p>
+          <p>Órdenes: {r.ventas?.ordenes}</p>
         </div>
       ))}
     </div>
