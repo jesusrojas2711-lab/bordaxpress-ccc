@@ -511,15 +511,16 @@ function TabRedes({ d, prev, months, byMonth }) {
   const fb = r.fb || {};
 
   const totalVis = (ig.vis ?? 0) + (fb.vis ?? 0);
-  const totalSeg = (ig.segNuevos ?? 0) + (fb.segNuevos ?? 0);
-  const totalClics = (ig.clics ?? 0) + (fb.clics ?? 0);
   const totalAlc = (ig.alcance ?? 0) + (fb.alcance ?? 0);
   const totalInter = (ig.inter ?? 0) + (fb.inter ?? 0);
+  const totalSeg = (ig.segNuevos ?? 0) + (fb.segNuevos ?? 0);
   const totalVisitas = (ig.visitas ?? 0) + (fb.visitas ?? 0);
+  const totalClics = (ig.clics ?? 0) + (fb.clics ?? 0);
 
   const trendData = months.map((m) => {
     const ri = byMonth[m]?.redes?.ig || {};
     const rf = byMonth[m]?.redes?.fb || {};
+
     return {
       mes: byMonth[m]?.label?.slice(0, 3) || m,
       ig_seg: ri.segNuevos ?? 0,
@@ -555,13 +556,13 @@ function TabRedes({ d, prev, months, byMonth }) {
         <div className="grid-4">
           <KPI label="Visualizaciones totales" value={N(totalVis)} color={T.blue} icon="👁" />
           <KPI label="Alcance total" value={N(totalAlc)} color={T.teal} icon="📡" />
+          <KPI label="Interacciones totales" value={N(totalInter)} color={T.purple} icon="⚡" />
           <KPI label="Seguidores nuevos" value={N(totalSeg)} color={T.green} icon="👥" />
-          <KPI label="Clics totales" value={N(totalClics)} color={T.gold} icon="🔗" />
         </div>
 
         <div className="grid-2" style={{ marginTop: 12 }}>
-          <KPI label="Interacciones totales" value={N(totalInter)} color={T.purple} icon="⚡" />
-          <KPI label="Visitas totales" value={N(totalVisitas)} color={T.cyan} icon="🏷" />
+          <KPI label="Visitas totales" value={N(totalVisitas)} color={T.gold} icon="🏷" />
+          <KPI label="Clics totales" value={N(totalClics)} color={T.cyan} icon="🔗" />
         </div>
       </Card>
 
@@ -572,7 +573,10 @@ function TabRedes({ d, prev, months, byMonth }) {
             <BarChart data={trendData}>
               <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
               <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
-              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+              <YAxis
+                tick={{ fill: T.textMid, fontSize: 10 }}
+                tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}
+              />
               <Tooltip content={<TTip />} />
               <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
               <Bar dataKey="ig_vis" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
