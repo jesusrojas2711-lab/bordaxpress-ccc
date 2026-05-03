@@ -18,12 +18,12 @@ const T = {
   border: "#1C2E45",
   borderHi: "#2A4065",
   blue: "#3B82F6",
-  cyan: "#22D3EE",
   teal: "#14B8A6",
   green: "#10B981",
   gold: "#F59E0B",
   red: "#F43F5E",
   purple: "#A78BFA",
+  cyan: "#22D3EE",
   text: "#E2E8F0",
   textMid: "#94A3B8",
   textDim: "#475569",
@@ -33,18 +33,14 @@ const T = {
 const CH = ["#3B82F6", "#14B8A6", "#F59E0B", "#10B981", "#F43F5E", "#A78BFA", "#22D3EE", "#FB923C"];
 
 const $ = (n) => n == null ? "—" : `$${Number(n).toLocaleString("es-MX", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-const $k = (n) => n == null ? "—" : n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : $(n);
 const N = (n) => n == null ? "—" : Number(n).toLocaleString("es-MX");
 const Pct = (n) => n == null ? "—" : `${Number(n).toFixed(1)}%`;
 const Chg = (a, b) => (a == null || b == null || a === 0) ? null : (((b - a) / a) * 100);
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #080E1A; color: #E2E8F0; font-family: 'Inter', system-ui, sans-serif; }
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #0D1626; }
-  ::-webkit-scrollbar-thumb { background: #1C2E45; border-radius: 4px; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: #080E1A; color: #E2E8F0; font-family: 'Inter', system-ui, sans-serif; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
@@ -70,129 +66,6 @@ const STYLES = `
     .grid-4, .grid-3 { grid-template-columns:1fr; }
   }
 `;
-
-function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg("");
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) setErrorMsg("Correo o contraseña incorrectos");
-    setLoading(false);
-  }
-
-  return (
-    <>
-      <style>{STYLES}</style>
-      <div style={{
-        minHeight: "100vh",
-        background: `linear-gradient(160deg, ${T.bg} 0%, #0F1E35 100%)`,
-        color: T.text,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "'Inter', system-ui, sans-serif",
-        padding: 24
-      }}>
-        <form onSubmit={handleLogin} style={{
-          width: "100%",
-          maxWidth: 420,
-          background: T.surface,
-          border: `1px solid ${T.border}`,
-          borderRadius: 18,
-          padding: 32,
-          boxShadow: "0 20px 60px #00000080"
-        }}>
-          <div style={{
-            width: 46,
-            height: 46,
-            borderRadius: 12,
-            background: `linear-gradient(135deg, ${T.blue}, ${T.teal})`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 900,
-            fontSize: 20,
-            marginBottom: 18,
-            fontFamily: "'Space Grotesk', sans-serif"
-          }}>
-            B
-          </div>
-
-          <h1 style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            marginBottom: 8,
-            fontSize: 26
-          }}>
-            BordaXpress CCC
-          </h1>
-
-          <p style={{ color: T.textMid, marginBottom: 24, fontSize: 14, lineHeight: 1.6 }}>
-            Inicia sesión para acceder al Centro de Control Comercial.
-          </p>
-
-          <input
-            type="email"
-            placeholder="Correo"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={inputStyle}
-          />
-
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={inputStyle}
-          />
-
-          {errorMsg && (
-            <p style={{ color: T.red, fontSize: 13, marginBottom: 14 }}>
-              {errorMsg}
-            </p>
-          )}
-
-          <button type="submit" disabled={loading} style={{
-            width: "100%",
-            padding: "12px 16px",
-            borderRadius: 10,
-            border: "none",
-            background: T.blue,
-            color: "white",
-            fontWeight: 800,
-            cursor: loading ? "not-allowed" : "pointer"
-          }}>
-            {loading ? "Entrando..." : "Iniciar sesión"}
-          </button>
-        </form>
-      </div>
-    </>
-  );
-}
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px 14px",
-  borderRadius: 10,
-  border: `1px solid ${T.border}`,
-  background: T.surfaceUp,
-  color: "white",
-  marginBottom: 14,
-  outline: "none"
-};
 
 function Card({ children, style = {}, delay = 0 }) {
   return (
@@ -241,11 +114,13 @@ function Badge({ children, color = T.blue, style = {} }) {
   );
 }
 
-function Delta({ prev, curr, inverse = false, size = 11 }) {
+function Delta({ prev, curr, inverse = false }) {
   const chg = Chg(prev, curr);
-  if (chg === null) return <span style={{ color: T.textDim, fontSize: size }}>—</span>;
+  if (chg === null) return <span style={{ color: T.textDim, fontSize: 11 }}>—</span>;
+
   const up = inverse ? chg <= 0 : chg >= 0;
   const color = up ? T.green : T.red;
+
   return (
     <span style={{
       display: "inline-flex",
@@ -256,7 +131,7 @@ function Delta({ prev, curr, inverse = false, size = 11 }) {
       border: `1px solid ${color}40`,
       borderRadius: 6,
       padding: "2px 8px",
-      fontSize: size,
+      fontSize: 11,
       fontWeight: 700,
     }}>
       {up ? "▲" : "▼"} {Math.abs(chg).toFixed(1)}%
@@ -293,6 +168,7 @@ function KPI({ label, value, sub, prev, curr, inverse = false, color = T.blue, i
 
 function TTip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
+
   return (
     <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "10px 14px", boxShadow: "0 8px 24px #000a" }}>
       {label && <div style={{ color: T.textMid, fontSize: 11, marginBottom: 6 }}>{label}</div>}
@@ -313,6 +189,130 @@ function Empty({ msg = "Sin datos para este periodo" }) {
     </div>
   );
 }
+
+function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) setErrorMsg("Correo o contraseña incorrectos");
+
+    setLoading(false);
+  }
+
+  return (
+    <>
+      <style>{STYLES}</style>
+      <div style={{
+        minHeight: "100vh",
+        background: `linear-gradient(160deg, ${T.bg} 0%, #0F1E35 100%)`,
+        color: T.text,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+        fontFamily: "'Inter', system-ui, sans-serif",
+      }}>
+        <form onSubmit={handleLogin} className="fade-up" style={{
+          width: "100%",
+          maxWidth: 420,
+          background: T.surface,
+          border: `1px solid ${T.border}`,
+          borderRadius: 18,
+          padding: 32,
+          boxShadow: "0 20px 60px #00000080",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 24 }}>
+            <div style={{
+              width: 42,
+              height: 42,
+              borderRadius: 12,
+              background: `linear-gradient(135deg, ${T.blue}, ${T.teal})`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: T.white,
+              fontWeight: 900,
+              fontFamily: "'Space Grotesk', sans-serif",
+              boxShadow: `0 0 20px ${T.blue}55`,
+            }}>
+              B
+            </div>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 20, fontFamily: "'Space Grotesk', sans-serif" }}>BordaXpress CCC</h1>
+              <p style={{ margin: "4px 0 0", color: T.textDim, fontSize: 12 }}>Panel ejecutivo interno</p>
+            </div>
+          </div>
+
+          <p style={{ color: T.textMid, marginBottom: 22, fontSize: 14, lineHeight: 1.6 }}>
+            Inicia sesión para acceder al Centro de Control Comercial.
+          </p>
+
+          <input
+            type="email"
+            placeholder="Correo"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          {errorMsg && (
+            <p style={{ color: T.red, fontSize: 13, marginBottom: 14 }}>
+              {errorMsg}
+            </p>
+          )}
+
+          <button type="submit" disabled={loading} style={{
+            width: "100%",
+            padding: "12px 16px",
+            borderRadius: 10,
+            border: "none",
+            background: T.blue,
+            color: T.white,
+            fontWeight: 800,
+            cursor: "pointer",
+            fontFamily: "'Inter', sans-serif",
+          }}>
+            {loading ? "Entrando..." : "Iniciar sesión"}
+          </button>
+        </form>
+      </div>
+    </>
+  );
+}
+
+const inputStyle = {
+  width: "100%",
+  padding: "12px 14px",
+  borderRadius: 10,
+  border: `1px solid ${T.border}`,
+  background: T.surfaceUp,
+  color: T.white,
+  marginBottom: 14,
+  outline: "none",
+  fontSize: 14,
+};
 
 const TABS = [
   { id: "resumen", label: "Resumen", icon: "◈" },
@@ -343,9 +343,9 @@ function TabResumen({ d, prev, months, byMonth }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div className="grid-4">
-        <KPI label="Ingresos del mes" value={$k(v.ingresos)} color={T.green} icon="💰" sub="MXN" prev={vp.ingresos} curr={v.ingresos} />
+        <KPI label="Ingresos del mes" value={$(v.ingresos)} color={T.green} icon="💰" sub="MXN" prev={vp.ingresos} curr={v.ingresos} />
         <KPI label="Ordenes cerradas" value={N(v.ordenes)} color={T.blue} icon="📦" sub="pedidos" prev={vp.ordenes} curr={v.ordenes} />
-        <KPI label="Ticket promedio" value={$(v.ingresos && v.ordenes ? Math.round(v.ingresos / v.ordenes) : null)} color={T.gold} icon="🎯" sub="por orden" />
+        <KPI label="Ticket promedio" value={$(v.ingresos && v.ordenes ? Math.round(v.ingresos / v.ordenes) : null)} color={T.gold} icon="🎯" sub="por orden" prev={vp.ingresos && vp.ordenes ? vp.ingresos / vp.ordenes : null} curr={v.ingresos && v.ordenes ? v.ingresos / v.ordenes : null} />
         <KPI label="Ingreso x mensaje" value={ingMsg ? `$${N(ingMsg)}` : "—"} color={T.teal} icon="💬" sub="eficiencia WA" prev={pingMsg} curr={ingMsg} />
       </div>
 
@@ -356,43 +356,22 @@ function TabResumen({ d, prev, months, byMonth }) {
         <KPI label="ROAS estimado" value={a.roasEstimado ? `${Number(a.roasEstimado).toFixed(1)}x` : "—"} color={T.purple} icon="📈" />
       </div>
 
-      <div className="grid-2">
-        <Card>
-          <SLabel accent={T.blue}>Comparativo vs mes anterior</SLabel>
-          {months.length > 1 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <ComposedChart data={compareData}>
-                <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-                <XAxis dataKey="name" tick={{ fill: T.textMid, fontSize: 11 }} />
-                <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-                <Tooltip content={<TTip />} />
-                <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
-                <Bar dataKey="anterior" name="Anterior" fill={T.border} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="actual" name="Actual" fill={T.blue} radius={[4, 4, 0, 0]} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          ) : <Empty msg="Se necesitan al menos 2 meses para comparar" />}
-        </Card>
-
-        <Card>
-          <SLabel accent={T.teal}>Canales de venta</SLabel>
-          {v.ordenes ? (
-            <ResponsiveContainer width="100%" height={180}>
-              <PieChart>
-                <Pie data={[
-                  { name: "WhatsApp", value: v.whatsapp ?? 0 },
-                  { name: "Tienda", value: v.tienda ?? 0 },
-                ]} cx="50%" cy="50%" innerRadius={48} outerRadius={72} paddingAngle={4} dataKey="value">
-                  <Cell fill={T.teal} />
-                  <Cell fill={T.gold} />
-                </Pie>
-                <Tooltip content={<TTip />} />
-                <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : <Empty />}
-        </Card>
-      </div>
+      <Card>
+        <SLabel accent={T.blue}>Comparativo vs mes anterior</SLabel>
+        {months.length > 1 ? (
+          <ResponsiveContainer width="100%" height={230}>
+            <ComposedChart data={compareData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+              <XAxis dataKey="name" tick={{ fill: T.textMid, fontSize: 11 }} />
+              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+              <Tooltip content={<TTip />} />
+              <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
+              <Bar dataKey="anterior" name="Anterior" fill={T.border} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="actual" name="Actual" fill={T.blue} radius={[4, 4, 0, 0]} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        ) : <Empty msg="Se necesitan al menos 2 meses para comparar" />}
+      </Card>
     </div>
   );
 }
@@ -403,27 +382,28 @@ function TabVentas({ d, prev, months, byMonth }) {
   const vp = prev?.ventas || {};
   const topSvcs = [...sv].sort((a, b) => b.valor - a.valor);
 
-  const trendData = months.map(m => ({
+  const trendData = months.map((m) => ({
     mes: byMonth[m]?.label?.slice(0, 3) || m,
     ingresos: byMonth[m]?.ventas?.ingresos ?? 0,
+    ordenes: byMonth[m]?.ventas?.ordenes ?? 0,
   }));
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div className="grid-3">
-        <KPI label="Ingresos totales" value={$(v.ingresos)} color={T.green} icon="💰" prev={vp.ingresos} curr={v.ingresos} />
+        <KPI label="Ingresos totales" value={$(v.ingresos)} color={T.green} icon="💰" sub="MXN" prev={vp.ingresos} curr={v.ingresos} />
         <KPI label="Ordenes" value={N(v.ordenes)} color={T.blue} icon="📦" prev={vp.ordenes} curr={v.ordenes} />
         <KPI label="Ticket promedio" value={$(v.ingresos && v.ordenes ? Math.round(v.ingresos / v.ordenes) : null)} color={T.gold} icon="🎯" />
       </div>
 
-      <div className="grid-2">
+      <div className="grid-31">
         <Card>
           <SLabel accent={T.blue}>Ingresos por servicio</SLabel>
           {topSvcs.length ? (
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={260}>
               <BarChart data={topSvcs} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke={T.border} horizontal={false} />
-                <XAxis type="number" tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={v => $(v)} />
+                <XAxis type="number" tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={(v) => $(v)} />
                 <YAxis dataKey="name" type="category" tick={{ fill: T.text, fontSize: 11 }} width={92} />
                 <Tooltip content={<TTip />} />
                 <Bar dataKey="valor" name="Ingresos" radius={[0, 6, 6, 0]}>
@@ -435,24 +415,41 @@ function TabVentas({ d, prev, months, byMonth }) {
         </Card>
 
         <Card>
-          <SLabel accent={T.green}>Tendencia de ingresos</SLabel>
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={trendData}>
-              <defs>
-                <linearGradient id="gIngresos" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={T.green} stopOpacity={0.25} />
-                  <stop offset="95%" stopColor={T.green} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
-              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip content={<TTip />} />
-              <Area type="monotone" dataKey="ingresos" name="Ingresos" stroke={T.green} fill="url(#gIngresos)" strokeWidth={2.5} />
-            </AreaChart>
-          </ResponsiveContainer>
+          <SLabel accent={T.teal}>Participacion por servicio</SLabel>
+          {topSvcs.length && v.ingresos ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {topSvcs.slice(0, 7).map((s, i) => {
+                const p = (s.valor / v.ingresos * 100).toFixed(1);
+                return (
+                  <div key={i}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ color: T.text, fontSize: 12, fontWeight: 500 }}>{s.name}</span>
+                      <span style={{ color: CH[i % CH.length], fontSize: 12, fontWeight: 700 }}>{$(s.valor)}</span>
+                    </div>
+                    <div style={{ height: 5, background: T.border, borderRadius: 3 }}>
+                      <div style={{ height: "100%", width: `${p}%`, background: CH[i % CH.length], borderRadius: 3 }} />
+                    </div>
+                    <div style={{ color: T.textDim, fontSize: 10, marginTop: 2 }}>{p}%</div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : <Empty />}
         </Card>
       </div>
+
+      <Card>
+        <SLabel accent={T.green}>Tendencia de ingresos</SLabel>
+        <ResponsiveContainer width="100%" height={180}>
+          <AreaChart data={trendData}>
+            <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+            <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
+            <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+            <Tooltip content={<TTip />} />
+            <Area type="monotone" dataKey="ingresos" name="Ingresos" stroke={T.green} fill={T.green + "33"} strokeWidth={2.5} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </Card>
     </div>
   );
 }
@@ -466,7 +463,7 @@ function TabWhatsApp({ d, prev, months, byMonth }) {
   const ingMsg = w.mensajes && v.ingresos ? Math.round(v.ingresos / w.mensajes) : null;
   const pingMsg = wp.mensajes && vp.ingresos ? Math.round(vp.ingresos / wp.mensajes) : null;
 
-  const trendData = months.map(m => ({
+  const trendData = months.map((m) => ({
     mes: byMonth[m]?.label?.slice(0, 3) || m,
     mensajes: byMonth[m]?.whatsapp?.mensajes ?? 0,
     intencion: byMonth[m]?.whatsapp?.intencion ?? 0,
@@ -478,20 +475,20 @@ function TabWhatsApp({ d, prev, months, byMonth }) {
       <div className="grid-4">
         <KPI label="Mensajes totales" value={N(w.mensajes)} color={T.blue} icon="💬" prev={wp.mensajes} curr={w.mensajes} />
         <KPI label="Promedio diario" value={w.promedioDiario ?? "—"} color={T.cyan} icon="📊" prev={wp.promedioDiario} curr={w.promedioDiario} />
-        <KPI label="Con intencion" value={N(w.intencion)} color={T.gold} icon="🎯" prev={wp.intencion} curr={w.intencion} />
+        <KPI label="Con intencion" value={N(w.intencion)} color={T.gold} icon="🎯" sub="conversaciones" prev={wp.intencion} curr={w.intencion} />
         <KPI label="Tasa conversion" value={Pct(w.tasaConv)} color={T.green} icon="✅" prev={wp.tasaConv} curr={w.tasaConv} />
       </div>
 
       <div className="grid-4">
-        <KPI label="Primera respuesta" value={w.t1Resp != null ? `${w.t1Resp} min` : "—"} color={w.t1Resp <= 20 ? T.green : T.gold} icon="⏱" prev={wp.t1Resp} curr={w.t1Resp} inverse />
+        <KPI label="T. primera respuesta" value={w.t1Resp != null ? `${w.t1Resp} min` : "—"} color={w.t1Resp != null && w.t1Resp <= 20 ? T.green : T.gold} icon="⏱" prev={wp.t1Resp} curr={w.t1Resp} inverse />
         <KPI label="Duracion conv." value={w.tConvActiva != null ? `${w.tConvActiva} min` : "—"} color={T.teal} icon="🕐" />
-        <KPI label="% intencion" value={Pct(w.pctIntencion)} color={T.blue} icon="📐" />
+        <KPI label="% con intencion" value={Pct(w.pctIntencion)} color={T.blue} icon="📐" prev={wp.pctIntencion} curr={w.pctIntencion} />
         <KPI label="Ingreso x mensaje" value={ingMsg ? `$${N(ingMsg)}` : "—"} color={T.green} icon="💵" prev={pingMsg} curr={ingMsg} />
       </div>
 
       <Card>
-        <SLabel accent={T.blue}>Tendencia mensual WA</SLabel>
-        <ResponsiveContainer width="100%" height={250}>
+        <SLabel accent={T.blue}>Tendencia mensual WhatsApp</SLabel>
+        <ResponsiveContainer width="100%" height={230}>
           <LineChart data={trendData}>
             <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
             <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
@@ -517,15 +514,15 @@ function TabRedes({ d, prev, months, byMonth }) {
   const totalClics = (ig.clics ?? 0) + (fb.clics ?? 0);
   const totalAlc = (ig.alcance ?? 0) + (fb.alcance ?? 0);
 
-  const trendData = months.map(m => {
+  const trendData = months.map((m) => {
     const ri = byMonth[m]?.redes?.ig || {};
     const rf = byMonth[m]?.redes?.fb || {};
     return {
       mes: byMonth[m]?.label?.slice(0, 3) || m,
-      ig_vis: ri.vis ?? 0,
-      fb_vis: rf.vis ?? 0,
       ig_seg: ri.segNuevos ?? 0,
       fb_seg: rf.segNuevos ?? 0,
+      ig_vis: ri.vis ?? 0,
+      fb_vis: rf.vis ?? 0,
     };
   });
 
@@ -535,23 +532,40 @@ function TabRedes({ d, prev, months, byMonth }) {
         <KPI label="Visualizaciones" value={N(totalVis)} color={T.blue} icon="👁" />
         <KPI label="Alcance" value={N(totalAlc)} color={T.teal} icon="📡" />
         <KPI label="Seguidores nuevos" value={N(totalSeg)} color={T.green} icon="👥" />
-        <KPI label="Clics" value={N(totalClics)} color={T.gold} icon="🔗" />
+        <KPI label="Clics totales" value={N(totalClics)} color={T.gold} icon="🔗" />
       </div>
 
-      <Card>
-        <SLabel accent={T.blue}>Visualizaciones por plataforma</SLabel>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={trendData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-            <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
-            <YAxis tick={{ fill: T.textMid, fontSize: 10 }} />
-            <Tooltip content={<TTip />} />
-            <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
-            <Bar dataKey="ig_vis" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
-            <Bar dataKey="fb_vis" name="Facebook" fill={T.blue} radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
+      <div className="grid-2">
+        <Card>
+          <SLabel accent={T.blue}>Seguidores nuevos</SLabel>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+              <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
+              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} />
+              <Tooltip content={<TTip />} />
+              <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
+              <Bar dataKey="ig_seg" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="fb_seg" name="Facebook" fill={T.blue} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card>
+          <SLabel accent={T.teal}>Visualizaciones</SLabel>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+              <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
+              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+              <Tooltip content={<TTip />} />
+              <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
+              <Bar dataKey="ig_vis" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="fb_vis" name="Facebook" fill={T.blue} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -570,20 +584,20 @@ function TabAds({ d, prev, months, byMonth }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {!hasData && (
-        <Card style={{ background: `${T.gold}10`, border: `1px solid ${T.gold}30` }}>
-          <span style={{ color: T.gold, fontSize: 13, fontWeight: 600 }}>Sin campaña activa este mes.</span>
+        <Card style={{ background: `${T.gold}10`, border: `1px solid ${T.gold}30`, padding: "14px 18px" }}>
+          <span style={{ color: T.gold, fontSize: 13, fontWeight: 600 }}>⚠️ Sin campaña activa este mes.</span>
         </Card>
       )}
 
       <div className="grid-4">
-        <KPI label="Inversion" value={$(a.inversion)} color={T.gold} icon="💸" prev={ap.inversion} curr={a.inversion} />
-        <KPI label="Alcance" value={N(a.alcance)} color={T.blue} icon="📡" />
-        <KPI label="Clics" value={N(a.clics)} color={T.cyan} icon="👆" prev={ap.clics} curr={a.clics} />
-        <KPI label="Conversaciones" value={N(a.conversaciones)} color={T.teal} icon="💬" />
+        <KPI label="Inversion total" value={$(a.inversion)} color={T.gold} icon="💸" sub={a.plataforma} prev={ap.inversion} curr={a.inversion} />
+        <KPI label="Alcance Ads" value={N(a.alcance)} color={T.blue} icon="📡" />
+        <KPI label="Clics generados" value={N(a.clics)} color={T.cyan} icon="👆" prev={ap.clics} curr={a.clics} />
+        <KPI label="Conversaciones" value={N(a.conversaciones)} color={T.teal} icon="💬" prev={ap.conversaciones} curr={a.conversaciones} />
       </div>
 
       <div className="grid-4">
-        <KPI label="Costo conv." value={a.costoPorConv ? `$${Number(a.costoPorConv).toFixed(2)}` : "—"} color={T.red} icon="💲" inverse />
+        <KPI label="Costo por conv." value={a.costoPorConv ? `$${Number(a.costoPorConv).toFixed(2)}` : "—"} color={T.red} icon="💲" prev={ap.costoPorConv} curr={a.costoPorConv} inverse />
         <KPI label="Ventas directas" value={N(a.ventasDirectas)} color={T.green} icon="✅" />
         <KPI label="ROAS directo" value={a.roasDirecto ? `${Number(a.roasDirecto).toFixed(1)}x` : "—"} color={T.teal} icon="⚡" />
         <KPI label="ROAS estimado" value={a.roasEstimado ? `${Number(a.roasEstimado).toFixed(1)}x` : "—"} color={T.purple} icon="🚀" />
@@ -595,7 +609,7 @@ function TabAds({ d, prev, months, byMonth }) {
           <BarChart data={roasData}>
             <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
             <XAxis dataKey="name" tick={{ fill: T.textMid, fontSize: 11 }} />
-            <YAxis tick={{ fill: T.textMid, fontSize: 10 }} />
+            <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
             <Tooltip content={<TTip />} />
             <Bar dataKey="value" name="Monto" radius={[6, 6, 0, 0]}>
               {roasData.map((e, i) => <Cell key={i} fill={e.fill} />)}
@@ -611,28 +625,39 @@ function TabInsights({ d, prev }) {
   const v = d.ventas || {};
   const w = d.whatsapp || {};
   const a = d.ads || {};
+  const vp = prev?.ventas || {};
+
   const items = [];
 
   if (w.tasaConv != null) {
-    if (w.tasaConv < 15) items.push({ color: T.red, title: "Conversión crítica", body: `Tasa de ${Pct(w.tasaConv)}. Revisar guion y seguimiento.` });
-    else if (w.tasaConv < 25) items.push({ color: T.gold, title: "Conversión moderada", body: `Conversión de ${Pct(w.tasaConv)}. Hay margen de mejora.` });
-    else items.push({ color: T.green, title: "Conversión saludable", body: `Conversión de ${Pct(w.tasaConv)}. Canal fuerte.` });
+    if (w.tasaConv < 20) items.push({ color: T.red, icon: "🔴", title: "Conversión baja", body: `Tasa de ${Pct(w.tasaConv)}. Revisar guion de ventas y seguimiento.` });
+    else items.push({ color: T.green, icon: "🟢", title: "Conversión saludable", body: `Tasa de ${Pct(w.tasaConv)}. Canal con potencial de escala.` });
   }
 
-  if (w.t1Resp > 20) items.push({ color: T.gold, title: "Respuesta lenta", body: `Primera respuesta en ${w.t1Resp} min. Meta: menos de 10 min.` });
-
-  if ((a.inversion ?? 0) > 0) {
-    if ((a.roasEstimado ?? 0) >= 5) items.push({ color: T.green, title: "Ads escalable", body: `ROAS estimado de ${a.roasEstimado}x. Evaluar subir presupuesto.` });
-    else items.push({ color: T.gold, title: "Ads por optimizar", body: "Revisar campaña, mensajes y ventas atribuidas." });
+  if (w.t1Resp != null && w.t1Resp > 20) {
+    items.push({ color: T.gold, icon: "🟡", title: "Respuesta lenta", body: `Primera respuesta en ${w.t1Resp} min. Meta sugerida: menos de 10 min.` });
   }
 
-  if (!items.length) return <Empty msg="Sin suficientes datos para generar insights" />;
+  if ((a.inversion ?? 0) > 0 && a.roasEstimado != null) {
+    if (a.roasEstimado >= 5) items.push({ color: T.green, icon: "🟢", title: "ROAS alto", body: `ROAS estimado de ${a.roasEstimado}x. Evaluar escalar presupuesto.` });
+    else items.push({ color: T.gold, icon: "🟡", title: "ROAS moderado", body: `ROAS estimado de ${a.roasEstimado}x. Optimizar antes de escalar.` });
+  }
+
+  if (vp.ingresos && v.ingresos) {
+    const chg = Chg(vp.ingresos, v.ingresos);
+    if (chg < 0) items.push({ color: T.red, icon: "🔴", title: "Ingresos en caída", body: `Ingresos bajaron ${Math.abs(chg).toFixed(1)}% vs mes anterior.` });
+    else items.push({ color: T.green, icon: "🟢", title: "Crecimiento positivo", body: `Ingresos crecieron ${chg.toFixed(1)}% vs mes anterior.` });
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {items.length === 0 && <Empty msg="Sin suficientes datos para generar insights" />}
       {items.map((ins, i) => (
         <Card key={i} style={{ borderLeft: `3px solid ${ins.color}` }}>
-          <h3 style={{ color: ins.color, fontSize: 15, marginBottom: 8 }}>{ins.title}</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <span>{ins.icon}</span>
+            <strong style={{ color: ins.color }}>{ins.title}</strong>
+          </div>
           <p style={{ color: T.textMid, fontSize: 13, lineHeight: 1.7 }}>{ins.body}</p>
         </Card>
       ))}
@@ -640,8 +665,7 @@ function TabInsights({ d, prev }) {
   );
 }
 
-function TabDecisiones({ d }) {
-  const v = d.ventas || {};
+function TabDecisiones({ d, prev }) {
   const w = d.whatsapp || {};
   const a = d.ads || {};
   const sv = d.servicios || [];
@@ -649,42 +673,42 @@ function TabDecisiones({ d }) {
 
   const decs = [];
 
-  if ((a.roasEstimado ?? 0) >= 5) decs.push("Escalar presupuesto de Meta Ads de forma gradual.");
-  if ((w.t1Resp ?? 0) > 15) decs.push("Reducir tiempo de respuesta en WhatsApp.");
-  if ((w.tasaConv ?? 0) < 20) decs.push("Revisar guion de ventas y seguimiento.");
-  if (topSvc) decs.push(`Reforzar contenido y oferta del servicio líder: ${topSvc.name}.`);
-  if (!decs.length) decs.push("Mantener operación y seguir acumulando datos.");
+  if ((a.roasEstimado ?? 0) >= 5 && (a.inversion ?? 0) > 0) {
+    decs.push({ color: T.green, title: "Escalar Meta Ads", desc: "La campaña muestra retorno suficiente para probar incremento de inversión gradual." });
+  }
+
+  if ((w.t1Resp ?? 0) > 15) {
+    decs.push({ color: T.red, title: "Reducir tiempo de respuesta", desc: "Priorizar automatización y respuestas rápidas en WhatsApp." });
+  }
+
+  if (topSvc) {
+    decs.push({ color: T.blue, title: `Reforzar ${topSvc.name}`, desc: `Servicio líder del mes con ${$(topSvc.valor)}. Crear más contenido y oferta sobre este servicio.` });
+  }
+
+  if (!decs.length) {
+    decs.push({ color: T.gold, title: "Mantener operación", desc: "No hay señales críticas. Seguir acumulando datos para decisiones más precisas." });
+  }
 
   return (
-    <Card>
-      <SLabel accent={T.purple}>Decisiones sugeridas</SLabel>
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {decs.map((d, i) => (
-        <div key={i} style={{
-          background: T.surfaceUp,
-          border: `1px solid ${T.border}`,
-          borderRadius: 10,
-          padding: 14,
-          marginBottom: 10,
-          display: "flex",
-          gap: 10
-        }}>
-          <span style={{ color: T.teal }}>▶</span>
-          <span style={{ color: T.text, fontSize: 13 }}>{d}</span>
-        </div>
+        <Card key={i}>
+          <strong style={{ color: d.color }}>{d.title}</strong>
+          <p style={{ color: T.textMid, fontSize: 13, lineHeight: 1.7 }}>{d.desc}</p>
+        </Card>
       ))}
-    </Card>
+    </div>
   );
 }
 
 export default function App() {
-  const [session, setSession] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
-
   const [tab, setTab] = useState("resumen");
   const [mes, setMes] = useState(null);
   const [DATA, setDATA] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
+  const [session, setSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -705,8 +729,6 @@ export default function App() {
     if (!session) return;
 
     async function load() {
-      setLoading(true);
-
       const { data, error } = await supabase
         .from("monthly_reports")
         .select("*")
@@ -724,9 +746,9 @@ export default function App() {
         return;
       }
 
-      const months = data.map(r => r.month);
-      const labels = Object.fromEntries(data.map(r => [r.month, r.label]));
-      const byMonth = Object.fromEntries(data.map(r => [r.month, {
+      const months = data.map((r) => r.month);
+      const labels = Object.fromEntries(data.map((r) => [r.month, r.label]));
+      const byMonth = Object.fromEntries(data.map((r) => [r.month, {
         label: r.label,
         ventas: r.ventas,
         servicios: r.servicios,
@@ -736,7 +758,15 @@ export default function App() {
       }]));
 
       setDATA({ months, labels, byMonth });
-      setMes(months[months.length - 1]);
+
+      const savedMonth = localStorage.getItem("bx_selected_month");
+
+      const defaultMonth =
+        savedMonth && months.includes(savedMonth)
+          ? savedMonth
+          : months[months.length - 1];
+
+      setMes(defaultMonth);
       setLoading(false);
     }
 
@@ -756,30 +786,32 @@ export default function App() {
 
   if (!session) return <LoginScreen />;
 
-  if (loading) return (
-    <>
-      <style>{STYLES}</style>
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: T.bg }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ width: 36, height: 36, border: `3px solid ${T.border}`, borderTop: `3px solid ${T.blue}`, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
-          <div style={{ color: T.textMid, fontSize: 13 }}>CARGANDO DATOS...</div>
+  if (loading) {
+    return (
+      <>
+        <style>{STYLES}</style>
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: T.bg }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ width: 36, height: 36, border: `3px solid ${T.border}`, borderTop: `3px solid ${T.blue}`, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 16px" }} />
+            <div style={{ color: T.textMid, fontSize: 13 }}>CARGANDO DATOS...</div>
+          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  }
 
-  if (err) return (
-    <>
-      <style>{STYLES}</style>
-      <div style={{ minHeight: "100vh", background: T.bg, color: T.red, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12 }}>
-        <div>Error de conexión</div>
-        <div style={{ color: T.textMid, fontSize: 12 }}>{err}</div>
-        <button onClick={() => supabase.auth.signOut()} style={{ padding: "8px 14px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.surfaceUp, color: T.text }}>
-          Cerrar sesión
-        </button>
-      </div>
-    </>
-  );
+  if (err) {
+    return (
+      <>
+        <style>{STYLES}</style>
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: T.bg, flexDirection: "column", gap: 12 }}>
+          <div style={{ fontSize: 32 }}>⚠️</div>
+          <div style={{ color: T.red, fontSize: 14, fontWeight: 600 }}>Error de conexión</div>
+          <div style={{ color: T.textMid, fontSize: 12, maxWidth: 360, textAlign: "center" }}>{err}</div>
+        </div>
+      </>
+    );
+  }
 
   if (!DATA || !mes) return null;
 
@@ -810,8 +842,9 @@ export default function App() {
           position: "sticky",
           top: 0,
           zIndex: 100,
+          backdropFilter: "blur(20px)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 60, gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 60, gap: 12, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <div style={{
                 width: 36,
@@ -839,19 +872,28 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ color: T.textDim, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>Periodo</span>
               <div style={{ display: "flex", background: `${T.border}66`, borderRadius: 8, padding: 3, gap: 2 }}>
-                {months.map(m => (
-                  <button key={m} className="month-btn" onClick={() => setMes(m)} style={{
-                    background: mes === m ? T.blue : "transparent",
-                    color: mes === m ? T.white : T.textMid,
-                    border: "none",
-                    borderRadius: 6,
-                    padding: "5px 14px",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    cursor: "pointer",
-                  }}>
+                {months.map((m) => (
+                  <button
+                    key={m}
+                    className="month-btn"
+                    onClick={() => {
+                      setMes(m);
+                      localStorage.setItem("bx_selected_month", m);
+                    }}
+                    style={{
+                      background: mes === m ? T.blue : "transparent",
+                      color: mes === m ? T.white : T.textMid,
+                      border: "none",
+                      borderRadius: 6,
+                      padding: "5px 14px",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
                     {labels[m]}
                   </button>
                 ))}
@@ -860,14 +902,14 @@ export default function App() {
               <button
                 onClick={() => supabase.auth.signOut()}
                 style={{
-                  background: T.surfaceUp,
+                  background: T.border,
                   color: T.text,
                   border: `1px solid ${T.borderHi}`,
                   borderRadius: 8,
                   padding: "6px 12px",
                   fontSize: 12,
+                  cursor: "pointer",
                   fontWeight: 700,
-                  cursor: "pointer"
                 }}
               >
                 Cerrar sesión
@@ -876,7 +918,7 @@ export default function App() {
           </div>
 
           <div style={{ display: "flex", overflowX: "auto" }}>
-            {TABS.map(t => (
+            {TABS.map((t) => (
               <button key={t.id} className="tab-btn" onClick={() => setTab(t.id)} style={{
                 background: "transparent",
                 color: tab === t.id ? T.white : T.textMid,
@@ -891,7 +933,7 @@ export default function App() {
                 alignItems: "center",
                 gap: 6,
               }}>
-                <span>{t.icon}</span>
+                <span style={{ opacity: tab === t.id ? 1 : 0.5 }}>{t.icon}</span>
                 {t.label}
               </button>
             ))}
@@ -902,9 +944,10 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18, flexWrap: "wrap" }}>
             <span style={{ color: T.textDim, fontSize: 11 }}>BordaXpress CCC</span>
             <span style={{ color: T.border, fontSize: 11 }}>›</span>
-            <span style={{ color: T.blue, fontSize: 11, fontWeight: 600 }}>{TABS.find(t => t.id === tab)?.label}</span>
+            <span style={{ color: T.blue, fontSize: 11, fontWeight: 600 }}>{TABS.find((t) => t.id === tab)?.label}</span>
             <span style={{ color: T.border, fontSize: 11 }}>›</span>
             <span style={{ color: T.textDim, fontSize: 11 }}>{labels[mes]}</span>
+            {prevData && <Badge color={T.textDim} style={{ fontSize: 10 }}>vs {labels[months[curIdx - 1]]}</Badge>}
           </div>
 
           <div key={`${tab}-${mes}`} className="fade-in">
