@@ -510,17 +510,16 @@ function TabRedes({ d, prev, months, byMonth }) {
   const ig = r.ig || {};
   const fb = r.fb || {};
 
+  // 🔵 Unificado
   const totalVis = (ig.vis ?? 0) + (fb.vis ?? 0);
   const totalAlc = (ig.alcance ?? 0) + (fb.alcance ?? 0);
-  const totalInter = (ig.inter ?? 0) + (fb.inter ?? 0);
+  const totalInter = (ig.interacciones ?? 0) + (fb.interacciones ?? 0);
   const totalSeg = (ig.segNuevos ?? 0) + (fb.segNuevos ?? 0);
-  const totalVisitas = (ig.visitas ?? 0) + (fb.visitas ?? 0);
   const totalClics = (ig.clics ?? 0) + (fb.clics ?? 0);
 
   const trendData = months.map((m) => {
     const ri = byMonth[m]?.redes?.ig || {};
     const rf = byMonth[m]?.redes?.fb || {};
-
     return {
       mes: byMonth[m]?.label?.slice(0, 3) || m,
       ig_seg: ri.segNuevos ?? 0,
@@ -530,134 +529,57 @@ function TabRedes({ d, prev, months, byMonth }) {
     };
   });
 
-  const PlatformMetrics = ({ title, data, color }) => (
-    <Card>
-      <SLabel accent={color}>{title}</SLabel>
-
-      <div className="grid-3">
-        <KPI label="Visualizaciones" value={N(data.vis)} color={color} icon="👁" />
-        <KPI label="Alcance" value={N(data.alcance)} color={T.teal} icon="📡" />
-        <KPI label="Interacciones" value={N(data.inter)} color={T.gold} icon="⚡" />
-      </div>
-
-      <div className="grid-3" style={{ marginTop: 12 }}>
-        <KPI label="Seguidores nuevos" value={N(data.segNuevos)} color={T.green} icon="👥" />
-        <KPI label="Visitas perfil" value={N(data.visitas)} color={T.purple} icon="🏷" />
-        <KPI label="Clics" value={N(data.clics)} color={T.cyan} icon="🔗" />
-      </div>
-    </Card>
-  );
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+      {/* 🔥 UNIFICADO */}
+      <div className="grid-4">
+        <KPI label="Visualizaciones totales" value={N(totalVis)} color={T.blue} icon="👁" />
+        <KPI label="Alcance total" value={N(totalAlc)} color={T.teal} icon="📡" />
+        <KPI label="Interacciones totales" value={N(totalInter)} color={T.purple} icon="⚡" />
+        <KPI label="Seguidores nuevos" value={N(totalSeg)} color={T.green} icon="👥" />
+      </div>
+
+      <div className="grid-2">
+        <Card>
+          <SLabel accent={T.gold}>Instagram</SLabel>
+          <div className="grid-3">
+            <KPI label="Visualizaciones" value={N(ig.vis)} color={T.gold} />
+            <KPI label="Alcance" value={N(ig.alcance)} color={T.teal} />
+            <KPI label="Interacciones" value={N(ig.interacciones)} color={T.purple} />
+            <KPI label="Seguidores" value={N(ig.segNuevos)} color={T.green} />
+            <KPI label="Visitas perfil" value={N(ig.visitas)} color={T.cyan} />
+            <KPI label="Clics" value={N(ig.clics)} color={T.blue} />
+          </div>
+        </Card>
+
+        <Card>
+          <SLabel accent={T.blue}>Facebook</SLabel>
+          <div className="grid-3">
+            <KPI label="Visualizaciones" value={N(fb.vis)} color={T.blue} />
+            <KPI label="Alcance" value={N(fb.alcance)} color={T.teal} />
+            <KPI label="Interacciones" value={N(fb.interacciones)} color={T.purple} />
+            <KPI label="Seguidores" value={N(fb.segNuevos)} color={T.green} />
+            <KPI label="Clics" value={N(fb.clics)} color={T.cyan} />
+          </div>
+        </Card>
+      </div>
+
       <Card>
-        <SLabel accent={T.blue}>Resultados unificados — Instagram + Facebook</SLabel>
-
-        <div className="grid-4">
-          <KPI label="Visualizaciones totales" value={N(totalVis)} color={T.blue} icon="👁" />
-          <KPI label="Alcance total" value={N(totalAlc)} color={T.teal} icon="📡" />
-          <KPI label="Interacciones totales" value={N(totalInter)} color={T.purple} icon="⚡" />
-          <KPI label="Seguidores nuevos" value={N(totalSeg)} color={T.green} icon="👥" />
-        </div>
-
-        <div className="grid-2" style={{ marginTop: 12 }}>
-          <KPI label="Visitas totales" value={N(totalVisitas)} color={T.gold} icon="🏷" />
-          <KPI label="Clics totales" value={N(totalClics)} color={T.cyan} icon="🔗" />
-        </div>
+        <SLabel accent={T.blue}>Seguidores nuevos</SLabel>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={trendData}>
+            <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
+            <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
+            <YAxis tick={{ fill: T.textMid, fontSize: 10 }} />
+            <Tooltip content={<TTip />} />
+            <Legend />
+            <Bar dataKey="ig_seg" name="Instagram" fill={T.gold} />
+            <Bar dataKey="fb_seg" name="Facebook" fill={T.blue} />
+          </BarChart>
+        </ResponsiveContainer>
       </Card>
 
-      <div className="grid-2">
-        <Card>
-          <SLabel accent={T.blue}>Visualizaciones por plataforma</SLabel>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
-              <YAxis
-                tick={{ fill: T.textMid, fontSize: 10 }}
-                tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}
-              />
-              <Tooltip content={<TTip />} />
-              <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
-              <Bar dataKey="ig_vis" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="fb_vis" name="Facebook" fill={T.blue} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card>
-          <SLabel accent={T.green}>Seguidores nuevos por plataforma</SLabel>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
-              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} />
-              <Tooltip content={<TTip />} />
-              <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
-              <Bar dataKey="ig_seg" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="fb_seg" name="Facebook" fill={T.blue} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
-      <PlatformMetrics title="Instagram" data={ig} color={T.gold} />
-      <PlatformMetrics title="Facebook" data={fb} color={T.blue} />
-    </div>
-  );
-}
-  const trendData = months.map((m) => {
-    const ri = byMonth[m]?.redes?.ig || {};
-    const rf = byMonth[m]?.redes?.fb || {};
-    return {
-      mes: byMonth[m]?.label?.slice(0, 3) || m,
-      ig_seg: ri.segNuevos ?? 0,
-      fb_seg: rf.segNuevos ?? 0,
-      ig_vis: ri.vis ?? 0,
-      fb_vis: rf.vis ?? 0,
-    };
-  });
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <div className="grid-4">
-        <KPI label="Visualizaciones" value={N(totalVis)} color={T.blue} icon="👁" />
-        <KPI label="Alcance" value={N(totalAlc)} color={T.teal} icon="📡" />
-        <KPI label="Seguidores nuevos" value={N(totalSeg)} color={T.green} icon="👥" />
-        <KPI label="Clics totales" value={N(totalClics)} color={T.gold} icon="🔗" />
-      </div>
-
-      <div className="grid-2">
-        <Card>
-          <SLabel accent={T.blue}>Seguidores nuevos</SLabel>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
-              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} />
-              <Tooltip content={<TTip />} />
-              <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
-              <Bar dataKey="ig_seg" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="fb_seg" name="Facebook" fill={T.blue} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        <Card>
-          <SLabel accent={T.teal}>Visualizaciones</SLabel>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} />
-              <XAxis dataKey="mes" tick={{ fill: T.textMid, fontSize: 11 }} />
-              <YAxis tick={{ fill: T.textMid, fontSize: 10 }} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
-              <Tooltip content={<TTip />} />
-              <Legend wrapperStyle={{ color: T.textMid, fontSize: 11 }} />
-              <Bar dataKey="ig_vis" name="Instagram" fill={T.gold} radius={[4, 4, 0, 0]} />
-              <Bar dataKey="fb_vis" name="Facebook" fill={T.blue} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
     </div>
   );
 }
