@@ -513,7 +513,7 @@ function TabRedes({ d, prev, months, byMonth }) {
   // 🔵 Unificado
   const totalVis = (ig.vis ?? 0) + (fb.vis ?? 0);
   const totalAlc = (ig.alcance ?? 0) + (fb.alcance ?? 0);
-  const totalInter = (ig.interacciones ?? 0) + (fb.interacciones ?? 0);
+  const totalInter = (ig.inter ?? 0) + (fb.inter ?? 0);
   const totalSeg = (ig.segNuevos ?? 0) + (fb.segNuevos ?? 0);
   const totalClics = (ig.clics ?? 0) + (fb.clics ?? 0);
 
@@ -546,7 +546,7 @@ function TabRedes({ d, prev, months, byMonth }) {
           <div className="grid-3">
             <KPI label="Visualizaciones" value={N(ig.vis)} color={T.gold} />
             <KPI label="Alcance" value={N(ig.alcance)} color={T.teal} />
-            <KPI label="Interacciones" value={N(ig.interacciones)} color={T.purple} />
+            <KPI label="Interacciones" value={N(ig.inter)} color={T.purple} />
             <KPI label="Seguidores" value={N(ig.segNuevos)} color={T.green} />
             <KPI label="Visitas perfil" value={N(ig.visitas)} color={T.cyan} />
             <KPI label="Clics" value={N(ig.clics)} color={T.blue} />
@@ -558,7 +558,7 @@ function TabRedes({ d, prev, months, byMonth }) {
           <div className="grid-3">
             <KPI label="Visualizaciones" value={N(fb.vis)} color={T.blue} />
             <KPI label="Alcance" value={N(fb.alcance)} color={T.teal} />
-            <KPI label="Interacciones" value={N(fb.interacciones)} color={T.purple} />
+            <KPI label="Interacciones" value={N(fb.inter)} color={T.purple} />
             <KPI label="Seguidores" value={N(fb.segNuevos)} color={T.green} />
             <KPI label="Clics" value={N(fb.clics)} color={T.cyan} />
           </div>
