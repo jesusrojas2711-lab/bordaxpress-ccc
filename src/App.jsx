@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
+  Tooltip, ResponsiveContainer
 } from "recharts";
 
 /* ─── SUPABASE ─── */
@@ -20,17 +20,13 @@ const safe = (n) => n ?? 0;
 const delta = (a, b) =>
   a && b ? (((b - a) / a) * 100).toFixed(1) : null;
 
-/* ─── COLORES ─── */
-const COLORS = ["#3B82F6", "#22C55E", "#F59E0B", "#EF4444"];
-
 /* ─── COMPONENTES ─── */
 
-function Card({ title, value, sub }) {
+function Card({ title, value }) {
   return (
     <div style={styles.card}>
       <p style={styles.sub}>{title}</p>
       <h2>{value}</h2>
-      {sub && <small style={styles.sub}>{sub}</small>}
     </div>
   );
 }
@@ -64,6 +60,33 @@ function Box({ title, children }) {
   );
 }
 
+/* ─── INSIGHTS ADS ─── */
+function getAdsInsights(ads) {
+  const insights = [];
+
+  if (!ads) return insights;
+
+  if (ads.roasEstimado < 3) {
+    insights.push({ type: "bad", text: "ROAS bajo (<3) — no rentable" });
+  } else if (ads.roasEstimado < 6) {
+    insights.push({ type: "warn", text: "ROAS medio — optimizar" });
+  } else {
+    insights.push({ type: "ok", text: "ROAS alto — escalar inversión" });
+  }
+
+  if (ads.costoPorConv > 25) {
+    insights.push({ type: "bad", text: "Costo por conversación alto" });
+  } else if (ads.costoPorConv < 15) {
+    insights.push({ type: "ok", text: "Costo por conversación eficiente" });
+  }
+
+  if (ads.conversaciones < 30) {
+    insights.push({ type: "warn", text: "Bajo volumen de conversaciones" });
+  }
+
+  return insights;
+}
+
 /* ─── APP ─── */
 
 export default function App() {
@@ -71,16 +94,7 @@ export default function App() {
   const [mes, setMes] = useState("");
   const [tab, setTab] = useState("resumen");
   const [status, setStatus] = useState("Cargando...");
-  const [session, setSession] = useState(null);
 
-  /* 🔐 SESIÓN */
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-    });
-  }, []);
-
-  /* 📊 DATA */
   useEffect(() => {
     async function load() {
       const { data, error } = await supabase
@@ -95,21 +109,11 @@ export default function App() {
 
       setReports(data || []);
       setMes(data?.[data.length - 1]?.month || "");
-      setStatus("Conectado");
+      setStatus("Conectado a Supabase");
     }
 
     load();
   }, []);
-
-  /* 🔒 BLOQUEO */
-  if (!session) {
-    return (
-      <div style={styles.container}>
-        <h2>Acceso restringido</h2>
-        <p>Necesitas iniciar sesión</p>
-      </div>
-    );
-  }
 
   const current = reports.find((r) => r.month === mes);
   const prevIndex = reports.findIndex((r) => r.month === mes) - 1;
@@ -119,9 +123,9 @@ export default function App() {
 
   const ventas = current.ventas || {};
   const whatsapp = current.whatsapp || {};
-  const servicios = current.servicios || [];
+  const ads = current.ads || null;
 
-  /* ─── MÉTRICAS CLAVE ─── */
+  /* ─── MÉTRICAS ─── */
 
   const ticket = ventas.ordenes
     ? ventas.ingresos / ventas.ordenes
@@ -129,10 +133,6 @@ export default function App() {
 
   const ingresoPorMensaje = whatsapp.mensajes
     ? ventas.ingresos / whatsapp.mensajes
-    : 0;
-
-  const dependenciaWA = ventas.ordenes
-    ? (ventas.whatsapp / ventas.ordenes) * 100
     : 0;
 
   const crecimiento =
@@ -145,26 +145,22 @@ export default function App() {
     ingresos: safe(r.ventas?.ingresos)
   }));
 
-  /* ─── INSIGHTS ─── */
+  /* ─── INSIGHTS GENERALES ─── */
 
   const insights = [];
 
   if (whatsapp.tasaConv < 20) {
-    insights.push({ type: "bad", text: "Conversión baja en WhatsApp (<20%)" });
+    insights.push({ type: "bad", text: "Conversión baja en WhatsApp" });
   } else if (whatsapp.tasaConv > 25) {
-    insights.push({ type: "ok", text: "Alta conversión en WhatsApp (escalable)" });
+    insights.push({ type: "ok", text: "Alta conversión en WhatsApp" });
   }
 
   if (whatsapp.t1Resp > 20) {
-    insights.push({ type: "warn", text: "Tiempo de respuesta alto (>20 min)" });
+    insights.push({ type: "warn", text: "Tiempo de respuesta alto" });
   }
 
   if (ingresoPorMensaje > 500) {
     insights.push({ type: "ok", text: "Alto valor por conversación" });
-  }
-
-  if (dependenciaWA > 70) {
-    insights.push({ type: "warn", text: "Alta dependencia de WhatsApp" });
   }
 
   return (
@@ -172,7 +168,7 @@ export default function App() {
       <h1>Centro de Control Comercial BX</h1>
       <p style={styles.sub}>{status}</p>
 
-      {/* selector mes */}
+      {/* SELECTOR MES */}
       <div style={styles.selector}>
         {reports.map((r) => (
           <button
@@ -188,9 +184,9 @@ export default function App() {
         ))}
       </div>
 
-      {/* tabs */}
+      {/* TABS */}
       <div style={styles.tabs}>
-        {["resumen", "ventas", "whatsapp", "insights"].map((t) => (
+        {["resumen", "whatsapp", "ads", "insights"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -214,7 +210,7 @@ export default function App() {
             <Card title="Crecimiento" value={crecimiento ? `${crecimiento}%` : "N/D"} />
           </div>
 
-          <Box title="Ingresos">
+          <Box title="Ingresos por mes">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
                 <CartesianGrid stroke="#1E3A5F" />
@@ -233,14 +229,47 @@ export default function App() {
         <div style={styles.grid4}>
           <Card title="Mensajes" value={whatsapp.mensajes} />
           <Card title="Conversión" value={`${whatsapp.tasaConv}%`} />
-          <Card title="Resp." value={`${whatsapp.t1Resp} min`} />
+          <Card title="Resp. inicial" value={`${whatsapp.t1Resp} min`} />
           <Card title="Ingreso x msg" value={fmtMoney(ingresoPorMensaje)} />
         </div>
       )}
 
+      {/* ADS */}
+      {tab === "ads" && (
+        <>
+          {!ads ? (
+            <Box title="Ads">
+              <p>No hay datos de campañas</p>
+            </Box>
+          ) : (
+            <>
+              <div style={styles.grid4}>
+                <Card title="Inversión" value={fmtMoney(ads.inversion)} />
+                <Card title="Clics" value={ads.clics} />
+                <Card title="Conversaciones" value={ads.conversaciones} />
+                <Card title="Costo x Conv." value={`$${ads.costoPorConv}`} />
+              </div>
+
+              <div style={styles.grid4}>
+                <Card title="ROAS Directo" value={`${ads.roasDirecto}x`} />
+                <Card title="ROAS Estimado" value={`${ads.roasEstimado}x`} />
+                <Card title="Ingresos Directos" value={fmtMoney(ads.ingresosDirectos)} />
+                <Card title="Ingresos Estimados" value={fmtMoney(ads.ingresosEstimados)} />
+              </div>
+
+              <Box title="Diagnóstico Ads">
+                {getAdsInsights(ads).map((i, idx) => (
+                  <Alert key={idx} type={i.type} text={i.text} />
+                ))}
+              </Box>
+            </>
+          )}
+        </>
+      )}
+
       {/* INSIGHTS */}
       {tab === "insights" && (
-        <Box title="Diagnóstico Automático">
+        <Box title="Diagnóstico General">
           {insights.length === 0 && <p>Todo en rango</p>}
           {insights.map((i, idx) => (
             <Alert key={idx} type={i.type} text={i.text} />
