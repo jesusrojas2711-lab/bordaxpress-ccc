@@ -30,13 +30,6 @@ export default async function handler(req, res) {
     const PAGE_ID = process.env.META_PAGE_ID;
     const TOKEN = process.env.META_ACCESS_TOKEN;
 
-    if (!PAGE_ID || !TOKEN) {
-      return res.status(400).json({
-        ok: false,
-        error: "Missing META_PAGE_ID or META_ACCESS_TOKEN",
-      });
-    }
-
     const pageUrl = `https://graph.facebook.com/v25.0/${PAGE_ID}?fields=name,fan_count,followers_count&access_token=${TOKEN}`;
     const pageResponse = await fetch(pageUrl);
     const pageInfo = await pageResponse.json();
@@ -45,7 +38,8 @@ export default async function handler(req, res) {
       return res.status(500).json({ ok: false, error: pageInfo.error });
     }
 
-   const insightsUrl = `https://graph.facebook.com/v25.0/${PAGE_ID}/insights?metric=page_impressions,page_engaged_users&period=day&access_token=${TOKEN}`;
+    const insightsUrl = `https://graph.facebook.com/v25.0/${PAGE_ID}/insights?metric=page_impressions,page_engaged_users&period=day&access_token=${TOKEN}`;
+    const insightsResponse = await fetch(insightsUrl);
     const insights = await insightsResponse.json();
 
     let impressions = 0;
@@ -53,7 +47,7 @@ export default async function handler(req, res) {
 
     if (!insights.error) {
       impressions = getMetricValue(insights, "page_impressions");
-      engagement = getMetricValue(insights, "page_post_engagements");
+      engagement = getMetricValue(insights, "page_engaged_users");
     }
 
     const payload = {
