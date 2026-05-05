@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     };
 
     const { data, error } = await supabase
-      .from("metricas_diarias_meta")
+      .from("meta_daily_metrics")
       .upsert(payload, { onConflict: "date,platform" })
       .select();
 
