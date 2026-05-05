@@ -1,88 +1,94 @@
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+function todaySonora() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Hermosillo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function getMetricValue(insights, metricName) {
+  const metric = insights?.data?.find((m) => m.name === metricName);
+  return metric?.values?.[0]?.value ?? 0;
+}
+
 export default async function handler(req, res) {
   try {
-    const { secret } = req.query;
+    const secret = req.query.secret;
 
     if (secret !== process.env.CRON_SECRET) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ ok: false, error: "Unauthorized" });
     }
 
-    const ACCESS_TOKEN = process.env.META_ACCESS_TOKEN;
+    const PAGE_ID = process.env.META_PAGE_ID;
+    const TOKEN = process.env.META_ACCESS_TOKEN;
 
-    // 1. Obtener página
-    const pageRes = await fetch(
-      `https://graph.facebook.com/v19.0/me/accounts?access_token=${ACCESS_TOKEN}`
-    );
-    const pageData = await pageRes.json();
+    if (!PAGE_ID || !TOKEN) {
+      return res.status(400).json({
+        ok: false,
+        error: "Missing META_PAGE_ID or META_ACCESS_TOKEN",
+      });
+    }
 
-    const page = pageData.data[0];
-    const PAGE_ID = page.id;
+    const pageUrl = `https://graph.facebook.com/v25.0/${PAGE_ID}?fields=name,fan_count,followers_count&access_token=${TOKEN}`;
+    const pageResponse = await fetch(pageUrl);
+    const pageInfo = await pageResponse.json();
 
-    // 2. Obtener seguidores
-    const pageInfoRes = await fetch(
-      `https://graph.facebook.com/v19.0/${PAGE_ID}?fields=name,fan_count,followers_count&access_token=${ACCESS_TOKEN}`
-    );
-    const pageInfo = await pageInfoRes.json();
+    if (pageInfo.error) {
+      return res.status(500).json({ ok: false, error: pageInfo.error });
+    }
 
-    // 3. Obtener métricas (INSIGHTS)
-    const insightsRes = await fetch(
-      `https://graph.facebook.com/v19.0/${PAGE_ID}/insights?metric=page_impressions,page_reach,page_engaged_users&period=day&access_token=${ACCESS_TOKEN}`
-    );
-    const insights = await insightsRes.json();
+    const insightsUrl = `https://graph.facebook.com/v25.0/${PAGE_ID}/insights?metric=page_impressions,page_post_engagements&period=day&access_token=${TOKEN}`;
+    const insightsResponse = await fetch(insightsUrl);
+    const insights = await insightsResponse.json();
 
     let impressions = 0;
-    let reach = 0;
     let engagement = 0;
 
-    insights.data.forEach((metric) => {
-      const value = metric.values[0].value;
+    if (!insights.error) {
+      impressions = getMetricValue(insights, "page_impressions");
+      engagement = getMetricValue(insights, "page_post_engagements");
+    }
 
-      if (metric.name === "page_impressions") impressions = value;
-      if (metric.name === "page_reach") reach = value;
-      if (metric.name === "page_engaged_users") engagement = value;
-    });
+    const payload = {
+      date: todaySonora(),
+      platform: "facebook",
+      followers_count: pageInfo.followers_count ?? pageInfo.fan_count ?? 0,
+      reach: 0,
+      views: impressions,
+      profile_views: 0,
+      clicks: 0,
+      interactions: engagement,
+      raw: {
+        page: pageInfo,
+        insights,
+      },
+    };
 
-    // clicks (no siempre viene, lo dejamos en 0)
-    const clicks = 0;
+    const { data, error } = await supabase
+      .from("meta_daily_metrics")
+      .upsert(payload, { onConflict: "date,platform" })
+      .select();
 
-    // 4. Guardar en Supabase
-    const supabaseRes = await fetch(
-      `${process.env.SUPABASE_URL}/rest/v1/meta_daily_metrics`,
-      {
-        method: "POST",
-        headers: {
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify([
-          {
-            date: new Date().toISOString().split("T")[0],
-            platform: "facebook",
-            followers_count: pageInfo.followers_count,
-            reach,
-            views: impressions,
-            profile_views: 0,
-            clicks,
-            interactions: engagement,
-            raw: {
-              page: pageInfo,
-              insights,
-            },
-          },
-        ]),
-      }
-    );
-
-    const saved = await supabaseRes.json();
+    if (error) {
+      return res.status(500).json({ ok: false, error });
+    }
 
     return res.status(200).json({
       ok: true,
-      saved,
+      saved: data,
     });
-  } catch (err) {
+  } catch (error) {
     return res.status(500).json({
       ok: false,
-      error: err.message,
+      error: error.message,
     });
   }
 }
