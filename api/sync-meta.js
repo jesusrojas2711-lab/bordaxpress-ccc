@@ -51,11 +51,6 @@ export default async function handler(req, res) {
       date: todaySonora(),
       platform: "facebook",
       followers_count: meta.followers_count ?? 0,
-      reach: 0,
-      views: 0,
-      profile_views: 0,
-      clicks: 0,
-      interactions: 0,
       raw: meta,
     };
 
