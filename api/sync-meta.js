@@ -45,8 +45,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ ok: false, error: pageInfo.error });
     }
 
-    const insightsUrl = `https://graph.facebook.com/v25.0/${PAGE_ID}/insights?metric=page_impressions,page_post_engagements&period=day&access_token=${TOKEN}`;
-    const insightsResponse = await fetch(insightsUrl);
+   const insightsUrl = `https://graph.facebook.com/v25.0/${PAGE_ID}/insights?metric=page_impressions,page_engaged_users&period=day&access_token=${TOKEN}`;
     const insights = await insightsResponse.json();
 
     let impressions = 0;
