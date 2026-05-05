@@ -12,7 +12,7 @@ const supabase = createClient(
 );
 
 const T = {
-  bg: "#0A1F54",
+  bg: "#080E1A",
   surface: "#0D1626",
   surfaceUp: "#121E30",
   border: "#1C2E45",
