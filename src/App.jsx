@@ -44,7 +44,6 @@ const Chg = (a,b) => (a==null||b==null||a===0) ? null : (((b-a)/a)*100);
 
 // ─── GLOBAL STYLES ────────────────────────────────────────────────────────────
 const STYLES = `
-@import url(‘https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap’);
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; }
