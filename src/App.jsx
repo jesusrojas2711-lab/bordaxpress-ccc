@@ -754,11 +754,15 @@ export default function App() {
       return;
     }
 
-    // =========================
-  // FACEBOOK API
+ // =========================
+// FACEBOOK API
+// =========================
+
 try {
   const PAGE_ID = "1150339298440018";
   const PAGE_TOKEN = import.meta.env.VITE_FB_PAGE_TOKEN;
+
+  // FOLLOWERS
 
   const followersRes = await fetch(
     `https://graph.facebook.com/v23.0/${PAGE_ID}?fields=followers_count&access_token=${PAGE_TOKEN}`
@@ -766,76 +770,65 @@ try {
 
   const followersData = await followersRes.json();
 
-  console.log("FB Followers:", followersData);
+  // INSIGHTS
 
-  if (!followersData.error) {
-    if (!data[data.length - 1].redes) {
-      data[data.length - 1].redes = {};
-    }
+  const insightsRes = await fetch(
+    `https://graph.facebook.com/v23.0/${PAGE_ID}/insights?metric=page_impressions,page_post_engagements&period=day&access_token=${PAGE_TOKEN}`
+  );
 
-    if (!data[data.length - 1].redes.fb) {
-      data[data.length - 1].redes.fb = {};
-    }
+  const insightsData = await insightsRes.json();
 
-    data[data.length - 1].redes.fb.segNuevos =
-      followersData.followers_count || 0;
-  } else {
-    console.error("Facebook Error:", followersData.error);
+  console.log("FOLLOWERS:", followersData);
+  console.log("INSIGHTS:", insightsData);
+
+  let fbReach = 0;
+  let fbInteractions = 0;
+  let fbViews = 0;
+
+  if (insightsData?.data) {
+    insightsData.data.forEach((metric) => {
+      const total =
+        metric.values?.reduce(
+          (acc, v) => acc + (v.value || 0),
+          0
+        ) || 0;
+
+      if (metric.name === "page_impressions") {
+        fbViews = total;
+        fbReach = total;
+      }
+
+      if (metric.name === "page_post_engagements") {
+        fbInteractions = total;
+      }
+    });
   }
-} catch (fbErr) {
-  console.error("FB FETCH ERROR:", fbErr);
+
+  // INSERTAR DATOS EN EL MES MÁS RECIENTE
+
+  if (data?.length) {
+    const latest = data[data.length - 1];
+
+    latest.redes = {
+      ...latest.redes,
+
+      fb: {
+        ...(latest.redes?.fb || {}),
+
+        segNuevos:
+          followersData.followers_count || 0,
+
+        alcance: fbReach,
+
+        inter: fbInteractions,
+
+        vis: fbViews,
+      },
+    };
+  }
+} catch (e) {
+  console.error("Facebook API Error:", e);
 }
-      // INSIGHTS
-   
-
-      
-
-      console.log("FOLLOWERS:", followersData);
-      console.log("INSIGHTS:", insightsData);
-
-      let fbReach = 0;
-      let fbInteractions = 0;
-      let fbViews = 0;
-
-      if (insightsData?.data) {
-        insightsData.data.forEach((metric) => {
-          const total = metric.values?.reduce(
-            (acc, v) => acc + (v.value || 0),
-            0
-          );
-
-          if (metric.name === "page_impressions") {
-            fbViews = total;
-            fbReach = total;
-          }
-
-          if (metric.name === "page_post_engagements") {
-            fbInteractions = total;
-          }
-        });
-      }
-
-      // INSERTAR DATOS EN EL MES MÁS RECIENTE
-
-      if (data?.length) {
-        const latest = data[data.length - 1];
-
-        latest.redes = {
-          ...latest.redes,
-
-          fb: {
-            ...(latest.redes?.fb || {}),
-
-            segNuevos: followersData.followers_count || 0,
-            alcance: fbReach,
-            inter: fbInteractions,
-            vis: fbViews,
-          },
-        };
-      }
-    } catch (e) {
-      console.error("Facebook API Error:", e);
-    }
 
     if (!data?.length) {
       setErr("No hay datos en monthly_reports.");
