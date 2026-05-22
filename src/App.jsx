@@ -772,11 +772,9 @@ export default function App() {
       const followersData = await followersRes.json();
 
       // INSIGHTS
-      const insightsRes = await fetch(
-  `https://graph.facebook.com/v23.0/${PAGE_ID}/insights?metric=page_fans&access_token=${PAGE_TOKEN}`
-);
+   
 
-      const insightsData = await insightsRes.json();
+      
 
       console.log("FOLLOWERS:", followersData);
       console.log("INSIGHTS:", insightsData);
