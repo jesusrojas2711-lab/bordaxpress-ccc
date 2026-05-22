@@ -740,52 +740,132 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!session) return;
+  if (!session) return;
 
-    async function load() {
-      const { data, error } = await supabase
-        .from("monthly_reports")
-        .select("*")
-        .order("month", { ascending: true });
+  async function load() {
+    const { data, error } = await supabase
+      .from("monthly_reports")
+      .select("*")
+      .order("month", { ascending: true });
 
-      if (error) {
-        setErr(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!data?.length) {
-        setErr("No hay datos en monthly_reports.");
-        setLoading(false);
-        return;
-      }
-
-      const months = data.map((r) => r.month);
-      const labels = Object.fromEntries(data.map((r) => [r.month, r.label]));
-      const byMonth = Object.fromEntries(data.map((r) => [r.month, {
-        label: r.label,
-        ventas: r.ventas,
-        servicios: r.servicios,
-        whatsapp: r.whatsapp,
-        redes: r.redes,
-        ads: r.ads ?? null,
-      }]));
-
-      setDATA({ months, labels, byMonth });
-
-      const savedMonth = localStorage.getItem("bx_selected_month");
-
-      const defaultMonth =
-        savedMonth && months.includes(savedMonth)
-          ? savedMonth
-          : months[months.length - 1];
-
-      setMes(defaultMonth);
+    if (error) {
+      setErr(error.message);
       setLoading(false);
+      return;
     }
 
-    load();
-  }, [session]);
+    // =========================
+    // FACEBOOK API
+    // =========================
+
+    try {
+      const PAGE_ID = "1150339298440018";
+
+      // PEGA AQUÍ TU PAGE ACCESS TOKEN
+      const PAGE_ACCESS_TOKEN = "EAAYazhttPqYBRtGyx4a3ZA6hcEhfr8UG8iHuzsFBauQTHk6KG5IpZC1mGGcZAriaeWGw6ndG8bfg16AWpTcuCNdsPIZBdOVU07VmrqBbPRqhaRAVgRJDPo9RyOg9oyw6zMiQAvIY2eiVSzPeQZAzNkMi1HToq19ZBd24xx6Rk1aY0MQ5mq8hjedFGuzHtSHH6WViXQR11FA4btwsnrARsA7r1B0to9nBhklpIuuPGosxOlpEPorxW37LAZD";
+
+      // FOLLOWERS
+      const followersRes = await fetch(
+        `https://graph.facebook.com/v23.0/${PAGE_ID}?fields=followers_count&access_token=${PAGE_ACCESS_TOKEN}`
+      );
+
+      const followersData = await followersRes.json();
+
+      // INSIGHTS
+      const insightsRes = await fetch(
+        `https://graph.facebook.com/v23.0/${PAGE_ID}/insights?metric=page_impressions,page_post_engagements&page=day&access_token=${PAGE_ACCESS_TOKEN}`
+      );
+
+      const insightsData = await insightsRes.json();
+
+      console.log("FOLLOWERS:", followersData);
+      console.log("INSIGHTS:", insightsData);
+
+      let fbReach = 0;
+      let fbInteractions = 0;
+      let fbViews = 0;
+
+      if (insightsData?.data) {
+        insightsData.data.forEach((metric) => {
+          const total = metric.values?.reduce(
+            (acc, v) => acc + (v.value || 0),
+            0
+          );
+
+          if (metric.name === "page_impressions") {
+            fbViews = total;
+            fbReach = total;
+          }
+
+          if (metric.name === "page_post_engagements") {
+            fbInteractions = total;
+          }
+        });
+      }
+
+      // INSERTAR DATOS EN EL MES MÁS RECIENTE
+
+      if (data?.length) {
+        const latest = data[data.length - 1];
+
+        latest.redes = {
+          ...latest.redes,
+
+          fb: {
+            ...(latest.redes?.fb || {}),
+
+            segNuevos: followersData.followers_count || 0,
+            alcance: fbReach,
+            inter: fbInteractions,
+            vis: fbViews,
+          },
+        };
+      }
+    } catch (e) {
+      console.error("Facebook API Error:", e);
+    }
+
+    if (!data?.length) {
+      setErr("No hay datos en monthly_reports.");
+      setLoading(false);
+      return;
+    }
+
+    const months = data.map((r) => r.month);
+
+    const labels = Object.fromEntries(
+      data.map((r) => [r.month, r.label])
+    );
+
+    const byMonth = Object.fromEntries(
+      data.map((r) => [
+        r.month,
+        {
+          label: r.label,
+          ventas: r.ventas,
+          servicios: r.servicios,
+          whatsapp: r.whatsapp,
+          redes: r.redes,
+          ads: r.ads ?? null,
+        },
+      ])
+    );
+
+    setDATA({ months, labels, byMonth });
+
+    const savedMonth = localStorage.getItem("bx_selected_month");
+
+    const defaultMonth =
+      savedMonth && months.includes(savedMonth)
+        ? savedMonth
+        : months[months.length - 1];
+
+    setMes(defaultMonth);
+    setLoading(false);
+  }
+
+  load();
+}, [session]);
 
   if (authLoading) {
     return (
