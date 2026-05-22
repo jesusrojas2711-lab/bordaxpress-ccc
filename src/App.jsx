@@ -755,22 +755,36 @@ export default function App() {
     }
 
     // =========================
-    // FACEBOOK API
-    // =========================
+  // FACEBOOK API
+try {
+  const PAGE_ID = "1150339298440018";
+  const PAGE_TOKEN = import.meta.env.VITE_FB_PAGE_TOKEN;
 
-    try {
-      const PAGE_ID = "1150339298440018";
+  const followersRes = await fetch(
+    `https://graph.facebook.com/v23.0/${PAGE_ID}?fields=followers_count&access_token=${PAGE_TOKEN}`
+  );
 
-      // PEGA AQUÍ TU PAGE ACCESS TOKEN
-      const PAGE_ACCESS_TOKEN = "EAAYazhttPqYBRtGyx4a3ZA6hcEhfr8UG8iHuzsFBauQTHk6KG5IpZC1mGGcZAriaeWGw6ndG8bfg16AWpTcuCNdsPIZBdOVU07VmrqBbPRqhaRAVgRJDPo9RyOg9oyw6zMiQAvIY2eiVSzPeQZAzNkMi1HToq19ZBd24xx6Rk1aY0MQ5mq8hjedFGuzHtSHH6WViXQR11FA4btwsnrARsA7r1B0to9nBhklpIuuPGosxOlpEPorxW37LAZD";
+  const followersData = await followersRes.json();
 
-      // FOLLOWERS
-      const followersRes = await fetch(
-        `https://graph.facebook.com/v23.0/${PAGE_ID}?fields=followers_count&access_token=${PAGE_ACCESS_TOKEN}`
-      );
+  console.log("FB Followers:", followersData);
 
-      const followersData = await followersRes.json();
+  if (!followersData.error) {
+    if (!data[data.length - 1].redes) {
+      data[data.length - 1].redes = {};
+    }
 
+    if (!data[data.length - 1].redes.fb) {
+      data[data.length - 1].redes.fb = {};
+    }
+
+    data[data.length - 1].redes.fb.segNuevos =
+      followersData.followers_count || 0;
+  } else {
+    console.error("Facebook Error:", followersData.error);
+  }
+} catch (fbErr) {
+  console.error("FB FETCH ERROR:", fbErr);
+}
       // INSIGHTS
    
 
