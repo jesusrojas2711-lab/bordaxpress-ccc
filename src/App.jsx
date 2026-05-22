@@ -773,8 +773,8 @@ export default function App() {
 
       // INSIGHTS
       const insightsRes = await fetch(
-        `https://graph.facebook.com/v23.0/${PAGE_ID}/insights?metric=page_impressions,page_post_engagements&page=day&access_token=${PAGE_ACCESS_TOKEN}`
-      );
+  `https://graph.facebook.com/v23.0/${PAGE_ID}/insights?metric=page_fans&access_token=${PAGE_TOKEN}`
+);
 
       const insightsData = await insightsRes.json();
 
